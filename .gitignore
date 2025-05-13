@@ -1,6 +1,7 @@
 # Build artifacts
 /build/
 /QA/
+/delivery/
 out/
 bin/
 lib/
