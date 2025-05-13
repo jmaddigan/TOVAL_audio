@@ -1,0 +1,10 @@
+{
+  "test_case": "03_-20dB_Headroom",
+  "GLOBAL": {
+    "GLOBAL_ENABLE_FLAG": 1
+  },
+  "HEADROOM": {
+    "ENABLE": 1,
+    "GAIN": -20.0
+  }
+}

@@ -1,0 +1,6 @@
+{
+    "test_case": "01_bypass",
+    "GLOBAL": {
+      "GLOBAL_ENABLE_FLAG": 0
+    }
+  }

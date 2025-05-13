@@ -1,0 +1,50 @@
+# Build artifacts
+/build/
+out/
+bin/
+lib/
+obj/
+*.o
+*.obj
+*.so
+*.dylib
+*.a
+*.lib
+*.exe
+*.out
+
+# CMake files
+/CMakeCache.txt
+/CMakeFiles/
+/CMakeScripts/
+/Testing/
+/_install/
+*.cmake
+Makefile
+cmake_install.cmake
+
+# VS Code settings (optional)
+.vscode/
+CMakeToolsProfiles.json
+CMakeTools/
+CMakePresets.json
+CMakeUserPresets.json
+
+# C++ dependency files
+*.d
+*.dep
+
+# Logs and temporary files
+*.log
+*.swp
+*.swo
+*.swn
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# macOS cache files
+**/.Spotlight-V100
+**/.Trashes

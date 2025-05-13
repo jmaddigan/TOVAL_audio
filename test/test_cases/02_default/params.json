@@ -1,0 +1,6 @@
+{
+  "test_case": "02_default",
+  "GLOBAL": {
+    "GLOBAL_ENABLE_FLAG": 1
+  }
+}
