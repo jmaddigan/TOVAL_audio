@@ -5,7 +5,6 @@ using namespace std;
 TOVAL_ERROR Headroom::headroom_init()
 {
     TOVAL_ERROR ret = TOVAL_ERROR::NO_ERROR;
-    cout<<"Headroom Init print"<<endl;
 
     headroom_features.resize(NUM_CHANNELS);       // In future this will not be macro, but a variable in main effect, defined in main effect Init before this
     y_1.resize(NUM_CHANNELS);                     // Using vector allows num channels to be more flexible at runtime.
@@ -15,24 +14,17 @@ TOVAL_ERROR Headroom::headroom_init()
         headroom_features[ch].gain = 1;
         y_1[ch] = 0;
     }
-
     enable = 0;
-    alpha = 0.2f;
-
+    alpha = 0.1f;
   return ret;
 }
 
 TOVAL_ERROR Headroom::headroom_set(uint16_t ParamID, size_t data_length, void* data)
 {
     TOVAL_ERROR ret = TOVAL_ERROR::NO_ERROR;
-    cout << "Headroom Set print" << endl;
 
     ret = headroom_do_set(ParamID, data_length, data);
 
-    if (ret != TOVAL_ERROR::NO_ERROR)
-    {
-        cout << "Error occurred in headroom_set: " << static_cast<int>(ret) << endl;
-    }
     return ret;
 }
 
@@ -42,20 +34,15 @@ TOVAL_ERROR Headroom::headroom_do_set(uint16_t ParamID, size_t data_length, void
 
     switch (ParamID)
     {
-        case ENABLE:
-            cout << "set Enable case called" << endl;
+        case TOVAL_HeadroomParam::HR_ENABLE:
             ret = set_enable(data_length, data);
             break;
 
-        case GAIN:
-            cout << "set Gain case called" << endl;
+        case TOVAL_HeadroomParam::HR_GAIN:
             ret = set_gain(data_length, data);
             break;
 
-        // Add other cases for other parameters...
-        
         default:
-            cout << "Error: No Parameter recognized for ParamID " << ParamID << endl;
             ret = TOVAL_ERROR::PARAMID_ERROR;
             break;
     }
@@ -69,16 +56,14 @@ TOVAL_ERROR Headroom::set_enable(size_t data_length, void* data)
     if (data_length != sizeof(enable))
     {
         ret = TOVAL_ERROR::SIZE_ERROR;
-        cout << "enable size error" << endl;
     }
     else if (data == nullptr)
     {
         ret = TOVAL_ERROR::NULL_POINTER_ERROR;
-        cout << "nullptr error in enable" << endl;
     }
     else
     {
-        bool value = *static_cast<const bool*>(data);
+        bool value = *static_cast<const uint32_t*>(data);
         enable = value;
     }
     return ret;
@@ -90,12 +75,10 @@ TOVAL_ERROR Headroom::set_gain(size_t data_length, void* data)
     if (data_length != sizeof(float))
     {
         ret = TOVAL_ERROR::SIZE_ERROR;
-        std::cout << "size Error" << std::endl;
     }
     if (data == nullptr)
     {
         ret = TOVAL_ERROR::NULL_POINTER_ERROR;
-        std::cout << "nullptr Error" << std::endl;
     }
     else
     {
@@ -104,7 +87,6 @@ TOVAL_ERROR Headroom::set_gain(size_t data_length, void* data)
         for(int ch=0; ch < HeadroomChannels::NUM_CHANNELS; ch++)
         {
             headroom_features[ch].gain = std::pow(10.0f, (gain / 20.0f));      // dB gain passed, Linear gain stored
-            std::cout << "Gain for channel " << ch << " set to " << gain << std::endl;
         }
     }
     return ret;
@@ -132,14 +114,9 @@ TOVAL_ERROR Headroom::set_alpha(size_t data_length, void* data)
 TOVAL_ERROR Headroom::headroom_get(uint16_t ParamID, size_t data_length, void* data)
 {
     TOVAL_ERROR ret = TOVAL_ERROR::NO_ERROR;
-    cout << "Headroom Get print" << endl;
 
     ret = headroom_do_get(ParamID, data_length, data);
 
-    if (ret != TOVAL_ERROR::NO_ERROR)
-    {
-        cout << "Error occurred in headroom_get: " << static_cast<int>(ret) << endl;
-    }
     return ret;
 }
 
@@ -149,14 +126,13 @@ TOVAL_ERROR Headroom::headroom_do_get(uint16_t ParamID, size_t data_length, void
 
     switch (ParamID)
     {
-        case ENABLE:
+        case TOVAL_HeadroomParam::HR_ENABLE:
             ret = get_enable(data_length, data);
             break;
 
         // Add other cases for other parameters...
 
         default:
-            cout << "Error: No Parameter recognized for ParamID " << ParamID << endl;
             ret = TOVAL_ERROR::PARAMID_ERROR;
             break;
     }
@@ -180,7 +156,27 @@ TOVAL_ERROR Headroom::get_enable(size_t data_length, void* data)
     else
     {
         // Cast data to bool pointer and retrieve the enable value
-        *static_cast<bool*>(data) = enable;
+        *static_cast<uint32_t*>(data) = enable;
+    }
+
+    return ret;
+}
+
+TOVAL_ERROR Headroom::get_gain(size_t data_length, void* data)
+{
+    TOVAL_ERROR ret = TOVAL_ERROR::NO_ERROR;
+    if (data_length != sizeof(float))
+    {
+        ret = TOVAL_ERROR::SIZE_ERROR;
+    }
+    if (data == nullptr)
+    {
+        ret = TOVAL_ERROR::NULL_POINTER_ERROR;
+    }
+    else
+    {
+        float value = 20.0f * std::log10(headroom_features[0].gain);
+        *static_cast<float*>(data) = value;      // dB gain passed, Linear gain stored
     }
 
     return ret;
@@ -192,7 +188,6 @@ TOVAL_ERROR Headroom::headroom_process(float **ppIn, float **ppOut, size_t nspc)
     TOVAL_ERROR error = TOVAL_ERROR::NO_ERROR;
     if (ppIn == nullptr || ppOut == nullptr)
     {
-        std::cout << "Error: NULL pointer passed to headroom_process" << std::endl;
         return TOVAL_ERROR::NULL_POINTER_ERROR;
     }
 
@@ -203,7 +198,6 @@ TOVAL_ERROR Headroom::headroom_process(float **ppIn, float **ppOut, size_t nspc)
 
         if (pIn == nullptr || pOut == nullptr)
         {
-            std::cout << "Error: Channel pointer incorrect. Check channel mapping" << std::endl;
             return TOVAL_ERROR::NULL_POINTER_ERROR;
         }
 

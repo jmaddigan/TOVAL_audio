@@ -1,7 +1,6 @@
 #ifndef HEADROOM_H
 #define HEADROOM_H
 
-#include <cstddef>
 #include <cstdint>
 #include <math.h>
 #include <vector>
@@ -9,6 +8,13 @@
 #include "TOVALaudio.h"
 #include "conversionFN.h"
 
+
+enum HeadroomChannels
+    {
+        LEFT,
+        RIGHT,
+        NUM_CHANNELS
+    };
 
 class Headroom {
 
@@ -58,22 +64,17 @@ class Headroom {
     };  // structure must be same order as elements passed in Json file for testing purposes
 
     std::vector<Headroom_gain> headroom_features;
-    
-    enum HeadroomChannels
-    {
-        LEFT,
-        RIGHT,
-        NUM_CHANNELS
-    };
 
+
+/*
     enum Params
     {
         ENABLE,
         GAIN,
         STEP_RESPONSE
     };
+*/
 };
-
 // Look into using 16 bit integers for arguments. also using template instead of void* for data
 
 

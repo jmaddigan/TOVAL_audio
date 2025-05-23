@@ -21,7 +21,7 @@ obj/
 /CMakeScripts/
 /Testing/
 /_install/
-*.cmake
+# *.cmake
 Makefile
 cmake_install.cmake
 
