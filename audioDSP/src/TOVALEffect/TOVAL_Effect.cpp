@@ -12,10 +12,6 @@ TOVAL_Effect::~TOVAL_Effect() {
 TOVAL_ERROR TOVAL_Effect::TOVAL_Effect_init()
 {
   TOVAL_ERROR ret = TOVAL_ERROR::NO_ERROR;
-  cout<<"Calling first module in TOVAL init"<<endl;
-
-  // Config
-  //pImpl->config.num_channels = NUM_CHANNELS;
   
   // call a set function that sets number samples per channel (chunk size). Can pass buffer.getNumSamples from JUCE processor.cpp
 
@@ -27,7 +23,6 @@ TOVAL_ERROR TOVAL_Effect::TOVAL_Effect_init()
 TOVAL_ERROR TOVAL_Effect::TOVAL_Effect_set(uint16_t moduleID, uint16_t paramID, uint16_t datalength, void* data)
 {
   TOVAL_ERROR ret = TOVAL_ERROR::NO_ERROR;
-  cout<<"Calling first module in TOVAL set"<<endl;
 
   /*
     Potential preset idea. Where the instance of pImpl is defined, you could have several Impl objects, one for each preset.
@@ -43,22 +38,41 @@ TOVAL_ERROR TOVAL_Effect::TOVAL_Effect_set(uint16_t moduleID, uint16_t paramID, 
   return ret;  
 }
 
+TOVAL_ERROR TOVAL_Effect::Impl::TOVAL_Effect_do_set(uint32_t moduleID, uint16_t paramID, uint16_t data_length, void* data)
+{
+    TOVAL_ERROR ret = TOVAL_ERROR::NO_ERROR;
+
+    switch(moduleID)
+    {
+      case TOVAL_Module::GLOBAL:
+        ret = global_set(paramID, data_length, (void*) data);
+        break;
+
+      case TOVAL_Module::HEADROOM:
+        ret = headroom.headroom_set(paramID, data_length, (void*) data);
+        break;
+      
+      default:
+        ret = TOVAL_ERROR::MODULEID_ERROR;
+        break;
+    }
+    return ret;
+}
+
 TOVAL_ERROR TOVAL_Effect::Impl::global_set(uint16_t paramID, uint16_t data_length, void* data)
 {
   TOVAL_ERROR ret = TOVAL_ERROR::NO_ERROR;
 
   switch(paramID)
   {
-    case GlobalParams::ENABLE:
+    case TOVAL_GlobalParam::GLOBAL_ENABLE:
       if (data_length != sizeof(variables.global_enable))
       {
         ret = TOVAL_ERROR::SIZE_ERROR;
-        cout << "enable size error!!!" << endl;
       }
       else if (data == nullptr)
       {
         ret = TOVAL_ERROR::NULL_POINTER_ERROR;
-        cout << "nullptr error in enable" << endl;
       }
       else
       {
@@ -66,52 +80,40 @@ TOVAL_ERROR TOVAL_Effect::Impl::global_set(uint16_t paramID, uint16_t data_lengt
         variables.global_enable = value;
       }
       break;
+
+    default:
+      ret = TOVAL_ERROR::PARAMID_ERROR;
+      break;
+    
   }
   return ret;
 }
 
-TOVAL_ERROR TOVAL_Effect::Impl::TOVAL_Effect_do_set(uint32_t moduleID, uint16_t paramID, uint16_t data_length, void* data)
+TOVAL_ERROR TOVAL_Effect::TOVAL_Effect_get(uint16_t moduleID, uint16_t paramID, uint16_t datalength, void* data)
+{ 
+  TOVAL_ERROR ret = TOVAL_ERROR::NO_ERROR;
+  ret = pImpl->TOVAL_Effect_do_get(moduleID, paramID, datalength, data);
+  return ret;
+}
+
+TOVAL_ERROR TOVAL_Effect::Impl::TOVAL_Effect_do_get(uint32_t moduleID, uint16_t paramID, uint16_t data_length, void* data)
 {
-    TOVAL_ERROR ret = TOVAL_ERROR::NO_ERROR;
-
-    // Check if this is the GLOBAL_BYPASS parameter
-    //if (paramID == Modules::GLOBAL) {
-        // Deserialize the data for GLOBAL_BYPASS
-        //uint32_t global_enable_value = *static_cast<uint32_t*>(data);
-
-        // Update the global_bypass flag based on the received value
-        //variables.global_enable = (global_enable_value == 1) ? 1 : 0;
-
-        // Update the global enable flag based on bypass setting
-        //return ret;
-    //}
-    switch(moduleID)
+  TOVAL_ERROR ret = TOVAL_ERROR::NO_ERROR;
+  switch(moduleID)
     {
-      case Modules::GLOBAL:
-      std::cout << "Global module set called!!!" << std::endl;
-        ret = global_set(paramID, data_length, (void*) data);
+      case TOVAL_Module::GLOBAL:
+        //ret = global_set(paramID, data_length, (void*) data);
         break;
 
-      case Modules::HEADROOM:
-        std::cout << "Headroom module set called!!!" << std::endl;
-        ret = headroom.headroom_set(paramID, data_length, (void*) data);
+      case TOVAL_Module::HEADROOM:
+        ret = headroom.headroom_get(paramID, data_length, (void*) data);
         break;
       
       default:
-        cout << "Error: No Parameter recognised" << endl;
-        ret = TOVAL_ERROR::PARAMID_ERROR;
+        ret = TOVAL_ERROR::MODULEID_ERROR;
         break;
     }
     return ret;
-}
-
-TOVAL_ERROR TOVAL_Effect::TOVAL_Effect_get()
-{ 
-  TOVAL_ERROR ret = TOVAL_ERROR::NO_ERROR;
-  cout<<"Calling first module in TOVAL get"<<endl;
-  //ret = pImpl->softClip.softClip_get();
-  
-  return ret;
 }
 
 TOVAL_ERROR TOVAL_Effect::TOVAL_Effect_process(float **ppIn, float **ppOut, size_t nspc)
@@ -133,20 +135,17 @@ TOVAL_ERROR TOVAL_Effect::TOVAL_Effect_process(float **ppIn, float **ppOut, size
      ret = pImpl->headroom.headroom_process(ppIn, ppOut, nspc);
   }
 
-
-  //if (pVariables->repeat_counter == 0);
-
   return ret;
 }
 
 void TOVAL_Effect::Impl::update_channel_config() {
-    Modules first = MODULE_FIRST;
-    Modules last = static_cast<Modules>(MODULE_COUNT - 1);
+    TOVAL_Module first = MODULE_FIRST;
+    TOVAL_Module last = static_cast<TOVAL_Module>(MODULE_COUNT - 1);
     config.In_num_channels = get_num_channels_for_module(first);
     config.Out_num_channels = get_num_channels_for_module(last);
 }
 
-TOVAL_ERROR TOVAL_Effect::set_config(size_t data_length, void *config_data)
+TOVAL_ERROR TOVAL_Effect::set_config(size_t data_length, const void *config_data)
 {
     TOVAL_ERROR ret = TOVAL_ERROR::NO_ERROR;
     if (data_length != sizeof(Impl::Config))
@@ -160,8 +159,9 @@ TOVAL_ERROR TOVAL_Effect::set_config(size_t data_length, void *config_data)
     }
     else
     {
-      Impl::Config values = *static_cast<const Impl::Config*>(config_data);
-      pImpl->config = values;
+    const Impl::Config* values = static_cast<const Impl::Config*>(config_data);
+    // Defensive copy and assignment
+    pImpl->config = *values;
 
       pImpl->update_channel_config();  // recalculate channel counts
     }
@@ -188,14 +188,4 @@ TOVAL_ERROR TOVAL_Effect::get_config(size_t data_length, void *config_data)
     }
 
     return ret;
-}
-
-TOVAL_ERROR TOVAL_Effect::Impl::internalProcess()
-{
-
-  TOVAL_ERROR ret = TOVAL_ERROR::NO_ERROR;
-  //cout<<"Calling first module in TOVAL init"<<endl;
-  //ret = pEQ.EQ_init();    // Only init because havent passed input yet
-    // Private processing logic
-  return ret;
 }

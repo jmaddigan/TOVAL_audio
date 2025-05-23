@@ -139,6 +139,11 @@ TOVAL_ERROR Tonal_Valley_test::prepareAudio()
         std::cout << "Config number Output channels = " << test_config.Out_num_channels << std::endl;
     }
 
+    test_config.sample_rate = inputWavHeader.SampleRate;
+
+    std::cout << "Config Sample Rate = " << test_config.sample_rate << std::endl;
+
+
     // Calculate number of frames (same across input/output)
     int numFrames = static_cast<int>(inputBuffer.size()) / test_config.In_num_channels;
 

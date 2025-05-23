@@ -37,6 +37,7 @@ private:
 
     struct Test_config
     {
+        float sample_rate;
         uint16_t In_num_channels;
         uint16_t Out_num_channels;
     }test_config;
