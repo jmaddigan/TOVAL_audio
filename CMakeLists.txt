@@ -12,6 +12,8 @@ message(STATUS "Using toolchain: ${TOOLCHAIN_NAME}")
 set(TOVAL_LIB TOVAL_Effect)         # Set audio effect static lib name
 set(TOVAL_EXE TOVAL_Effect_test)    # Set audio effect test executable name
 
+file(WRITE "${CMAKE_BINARY_DIR}/config.txt" "TOVAL_EXE=${TOVAL_EXE}\n")
+
 set(SOFTCLIP_LIB softclip_lib)    # Set audio module static lib name
 set(MODULE_TESTS module_tests)
 

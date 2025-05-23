@@ -1,8 +1,9 @@
 #!/bin/bash
 
 # Define the test executable directory
+source ../build/config.txt
 TEST_EXE_DIR="../build/bin"
-TEST_EXE="$TEST_EXE_DIR/TOVAL_Effect_test"
+TEST_EXE="$TEST_EXE_DIR/$TOVAL_EXE"
 
 # Define the test cases directory
 TEST_CASES_DIR="../test/test_cases"

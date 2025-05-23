@@ -37,6 +37,7 @@ if(DELIVERY)
     # Install the headers directly into the delivery inc folder
     install(FILES
         ${CMAKE_SOURCE_DIR}/audioDSP/inc/TOVALEffect/TOVAL_Effect.h  # Add header files explicitly
+        ${CMAKE_SOURCE_DIR}/audioDSP/inc/utils/TOVALaudio.h  # Add header files explicitly
         DESTINATION ${DELIVERY_DIR_INC}                        # Copy directly to the inc folder
     )
 endif()
